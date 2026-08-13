@@ -30,14 +30,24 @@ def home():
 
 # create the model for the request body
 class QuestionRequest(BaseModel):
+    document_id: int
     question: str
 
 
 @app.post("/ask")
-def ask_question(request: QuestionRequest):
+def ask_question(
+    request: QuestionRequest,
+    db: Session = Depends(get_db)
+):
+    document = db.query(Document).filter(Document.id == request.document_id).first()
+
+    if not document:
+        return {"message": "Document not found"}
+    
     return {
-        "message": "Question received",
-        "question": request.question
+        "document_id": document.id,
+        "question": request.question,
+        "document_text": document.text
         }
 
 
