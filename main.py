@@ -3,6 +3,8 @@ from fastapi import FastAPI
 from fastapi import UploadFile, File
 # pydantic is used to define and validate the request body that our API recieves.
 from pydantic import BaseModel
+# pypdf is a library for reading and manipulating PDF files in Python.
+from pypdf import PdfReader
 
 app = FastAPI()
 
@@ -28,7 +30,16 @@ def ask_question(request: QuestionRequest):
 
 @app.post("/documents/upload")
 async def upload_document(file: UploadFile = File(...)):
+
+    reader = PdfReader(file.file)
+
+    text = ""
+    
+    for page in reader.pages:
+        text += page.extract_text() or ""
+
     return {
         "filename": file.filename,
         "content_type": file.content_type,
+        "text": text
     }
