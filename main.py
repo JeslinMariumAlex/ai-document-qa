@@ -6,7 +6,8 @@ from pydantic import BaseModel
 from pypdf import PdfReader
 from sqlalchemy.orm import Session
 from database import engine, Base, SessionLocal
-from models import Document
+from chunking import chunk_text
+from models import Document, DocumentChunk
 
 app = FastAPI()
 
@@ -74,7 +75,18 @@ async def upload_document(
     db.add(document)
     db.commit()
     # gets the generated id from PostgreSQL.
-    db.refresh(document)    
+    db.refresh(document)   
+
+    chunks = chunk_text(document.text)
+
+    for chunk in chunks:
+        document_chunk = DocumentChunk(
+            document_id=document.id,
+            text=chunk
+        )
+        db.add(document_chunk)
+
+    db.commit() 
 
     return {
         "document_id": document.id,
