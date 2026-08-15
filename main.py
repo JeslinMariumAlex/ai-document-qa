@@ -40,7 +40,7 @@ class QuestionRequest(BaseModel):
 def ask_question(
     request: QuestionRequest
 ):
-    chunks = search_similar_chunks(request.question)
+    chunks = search_similar_chunks(request.question, request.document_id)
 
     return {
         "question": request.question,
