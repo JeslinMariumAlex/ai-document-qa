@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from database import engine, Base, SessionLocal
 from chunking import chunk_text
 from models import Document, DocumentChunk
+from embedding_service import search_similar_chunks, create_embedding
 
 app = FastAPI()
 
@@ -37,19 +38,20 @@ class QuestionRequest(BaseModel):
 
 @app.post("/ask")
 def ask_question(
-    request: QuestionRequest,
-    db: Session = Depends(get_db)
+    request: QuestionRequest
 ):
-    document = db.query(Document).filter(Document.id == request.document_id).first()
+    chunks = search_similar_chunks(request.question)
 
-    if not document:
-        return {"message": "Document not found"}
-    
     return {
-        "document_id": document.id,
         "question": request.question,
-        "document_text": document.text
-        }
+        "chunks": [
+            {
+                "chunk_id": chunk.id,
+                "text": chunk.text
+            }
+            for chunk in chunks
+        ]
+    }
 
 
 @app.post("/documents/upload")
@@ -80,9 +82,12 @@ async def upload_document(
     chunks = chunk_text(document.text)
 
     for chunk in chunks:
+        embedding = create_embedding(chunk)
+
         document_chunk = DocumentChunk(
             document_id=document.id,
-            text=chunk
+            text=chunk,
+            embedding=embedding
         )
         db.add(document_chunk)
 
