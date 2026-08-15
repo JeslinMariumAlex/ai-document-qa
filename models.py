@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from pgvector.sqlalchemy import Vector
 from database import Base
 
 
@@ -18,3 +19,4 @@ class DocumentChunk(Base):
     id = Column(Integer, primary_key=True, index=True)
     document_id = Column(Integer, ForeignKey("documents.id"), nullable=False)
     text = Column(Text, nullable=False)
+    embedding = Column(Vector(384), nullable=True)
