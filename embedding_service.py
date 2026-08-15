@@ -29,9 +29,42 @@ def generate_embeddings():
 
     finally:
         db.close()
+
+
+
+def create_query_embedding(question: str):
+    return model.encode(question).tolist()
+
+
+
+def search_similar_chunks(question: str, limit: int = 3):
+    db = SessionLocal()
+
+    try:
+        question_embedding = create_query_embedding(question)
+
+        chunks = (
+            db.query(DocumentChunk)
+            .order_by(
+                DocumentChunk.embedding.cosine_distance(question_embedding)
+            )
+            .limit(limit)
+            .all()
+        )
+
+        return chunks
+
+    finally:
+        db.close()
         
 
 if __name__ == "__main__":
-    generate_embeddings()
+    results = search_similar_chunks(
+        "What backend technologies are required?"
+    )
 
-    print("Embeddings generated successfully")        
+    print("Number of results:", len(results))
+
+    for chunk in results:
+        print("\nChunk ID:", chunk.id)
+        print(chunk.text[:200])
