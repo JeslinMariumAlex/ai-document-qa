@@ -9,6 +9,7 @@ from database import engine, Base, SessionLocal
 from chunking import chunk_text
 from models import Document, DocumentChunk
 from embedding_service import search_similar_chunks, create_embedding
+from llm_service import build_prompt, generate_answer
 
 app = FastAPI()
 
@@ -37,20 +38,19 @@ class QuestionRequest(BaseModel):
 
 
 @app.post("/ask")
-def ask_question(
-    request: QuestionRequest
-):
+def ask_question(request: QuestionRequest):
+    # gets the relevant chunks.
     chunks = search_similar_chunks(request.question, request.document_id)
 
+    # creates the prompt from the question + retrieved context.
+    prompt = build_prompt(request.question, chunks)
+    # sends that prompt to Llama and gets the answer.
+    answer = generate_answer(prompt)
+
+    # returns the actual answer to the API caller.
     return {
         "question": request.question,
-        "chunks": [
-            {
-                "chunk_id": chunk.id,
-                "text": chunk.text
-            }
-            for chunk in chunks
-        ]
+        "answer": answer
     }
 
 
