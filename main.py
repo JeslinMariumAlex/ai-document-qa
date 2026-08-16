@@ -38,7 +38,15 @@ class QuestionRequest(BaseModel):
 
 
 @app.post("/ask")
-def ask_question(request: QuestionRequest):
+def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
+
+    document = (db.query(Document).filter(Document.id == request.document_id).first())
+
+    if not document:
+        return {
+            "message": "Document not found"
+        }
+
     # gets the relevant chunks.
     chunks = search_similar_chunks(request.question, request.document_id, limit=5)
 
