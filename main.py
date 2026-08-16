@@ -1,5 +1,5 @@
 # UploadFile and File are used to handle file uploads in FastAPI.
-from fastapi import FastAPI, UploadFile, File, Depends
+from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
 # pydantic is used to define and validate the request body that our API recieves.
 from pydantic import BaseModel
 # pypdf is a library for reading and manipulating PDF files in Python.
@@ -43,9 +43,10 @@ def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
     document = (db.query(Document).filter(Document.id == request.document_id).first())
 
     if not document:
-        return {
-            "message": "Document not found"
-        }
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found"
+        )
 
     # gets the relevant chunks.
     chunks = search_similar_chunks(request.question, request.document_id, limit=5)
