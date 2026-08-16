@@ -40,7 +40,7 @@ class QuestionRequest(BaseModel):
 @app.post("/ask")
 def ask_question(request: QuestionRequest):
     # gets the relevant chunks.
-    chunks = search_similar_chunks(request.question, request.document_id)
+    chunks = search_similar_chunks(request.question, request.document_id, limit=5)
 
     # creates the prompt from the question + retrieved context.
     prompt = build_prompt(request.question, chunks)
