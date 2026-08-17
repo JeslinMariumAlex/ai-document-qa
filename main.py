@@ -76,6 +76,10 @@ async def upload_document(file: UploadFile = File(...), db: Session = Depends(ge
 
     for page in reader.pages:
         text += page.extract_text() or ""
+
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="Could not extract text from the PDF")
+
     try:
         # creates a Python object representing a database row.
         document = Document(filename=file.filename, content_type=file.content_type,text=text)
