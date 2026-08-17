@@ -1,7 +1,7 @@
 # UploadFile and File are used to handle file uploads in FastAPI.
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
 # pydantic is used to define and validate the request body that our API recieves.
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 # pypdf is a library for reading and manipulating PDF files in Python.
 from pypdf import PdfReader
 from sqlalchemy.orm import Session
@@ -34,7 +34,7 @@ def home():
 # create the model for the request body
 class QuestionRequest(BaseModel):
     document_id: int
-    question: str
+    question: str = Field(..., min_length=1)
 
 
 @app.post("/ask")
