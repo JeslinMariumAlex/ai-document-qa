@@ -40,6 +40,12 @@ class QuestionRequest(BaseModel):
 @app.post("/ask")
 def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
 
+    if not request.question.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty"
+        )
+
     document = (db.query(Document).filter(Document.id == request.document_id).first())
 
     if not document:
