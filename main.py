@@ -1,3 +1,4 @@
+import logging
 # UploadFile and File are used to handle file uploads in FastAPI.
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
 # pydantic is used to define and validate the request body that our API recieves.
@@ -10,6 +11,8 @@ from chunking import chunk_text
 from models import Document, DocumentChunk
 from embedding_service import search_similar_chunks, create_embedding
 from llm_service import build_prompt, generate_answer
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -106,6 +109,7 @@ async def upload_document(file: UploadFile = File(...), db: Session = Depends(ge
 
     except Exception:
         db.rollback()
+        logger.exception("Failed to process document")
         raise
 
     return {
