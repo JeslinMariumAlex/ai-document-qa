@@ -16,7 +16,6 @@ app = FastAPI()
 # This tells , Look at all the models registered with Base in the models.py file and create the database tables if they don't already exist. 
 Base.metadata.create_all(bind=engine)
 
-
 # This gives an endpoint a database session and makes sure it gets closed afterwards.
 def get_db():
     db = SessionLocal()
@@ -28,7 +27,6 @@ def get_db():
 @app.get("/")
 def home():
     return {"message": "AI Document Q&A API is Running"}
-
 
 
 # create the model for the request body
@@ -49,10 +47,7 @@ def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
     document = (db.query(Document).filter(Document.id == request.document_id).first())
 
     if not document:
-        raise HTTPException(
-            status_code=404,
-            detail="Document not found"
-        )
+        raise HTTPException(status_code=404, detail="Document not found")
 
     # gets the relevant chunks.
     chunks = search_similar_chunks(request.question, request.document_id, limit=5)
@@ -70,17 +65,10 @@ def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/documents/upload")
-async def upload_document(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db)
-):
-
+async def upload_document(file: UploadFile = File(...), db: Session = Depends(get_db)):
 
     if file.content_type != "application/pdf":
-        raise HTTPException(
-            status_code=400,
-            detail="Only PDF files are allowed"
-        )
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
 
     reader = PdfReader(file.file)
 
@@ -88,32 +76,27 @@ async def upload_document(
 
     for page in reader.pages:
         text += page.extract_text() or ""
+    try:
+        # creates a Python object representing a database row.
+        document = Document(filename=file.filename, content_type=file.content_type,text=text)
 
-    # creates a Python object representing a database row.
-    document = Document(
-        filename=file.filename,
-        content_type=file.content_type,
-        text=text
-    )
-    # saves that row into PostgreSQL.
-    db.add(document)
-    db.commit()
-    # gets the generated id from PostgreSQL.
-    db.refresh(document)   
+        # Add document
+        db.add(document)
+        # get document.id
+        db.flush()   
 
-    chunks = chunk_text(document.text)
+        chunks = chunk_text(document.text)
 
-    for chunk in chunks:
-        embedding = create_embedding(chunk)
+        for chunk in chunks:
+            embedding = create_embedding(chunk)
+            document_chunk = DocumentChunk(document_id=document.id, text=chunk, embedding=embedding)
+            db.add(document_chunk)
 
-        document_chunk = DocumentChunk(
-            document_id=document.id,
-            text=chunk,
-            embedding=embedding
-        )
-        db.add(document_chunk)
+        db.commit() 
 
-    db.commit() 
+    except Exception:
+        db.rollback()
+        raise
 
     return {
         "document_id": document.id,
