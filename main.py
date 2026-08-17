@@ -52,6 +52,12 @@ def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
     # gets the relevant chunks.
     chunks = search_similar_chunks(request.question, request.document_id, limit=5)
 
+    if not chunks:
+        return {
+            "question": request.question,
+            "answer": "The information is not available in the provided document."
+        }
+
     # creates the prompt from the question + retrieved context.
     prompt = build_prompt(request.question, chunks)
     # sends that prompt to Llama and gets the answer.

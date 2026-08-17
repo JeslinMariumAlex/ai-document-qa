@@ -22,14 +22,16 @@ def search_similar_chunks(question: str,  document_id: int, limit: int = 3):
 
         chunks = (
             db.query(DocumentChunk)
-            .filter(DocumentChunk.document_id == document_id)
+            .filter(
+                DocumentChunk.document_id == document_id,
+                DocumentChunk.embedding.cosine_distance(question_embedding) <= 0.75
+            )
             .order_by(
                 DocumentChunk.embedding.cosine_distance(question_embedding)
             )
             .limit(limit)
             .all()
         )
-
         return chunks
 
     finally:
@@ -37,13 +39,18 @@ def search_similar_chunks(question: str,  document_id: int, limit: int = 3):
         
 
 if __name__ == "__main__":
-    results = search_similar_chunks(
-        "What backend technologies are required?",
-        document_id=4
-    )
+
+    question = "What databases are used?"
+    
+    results = search_similar_chunks(question, document_id=10, limit=5)
 
     print("Number of results:", len(results))
 
     for chunk in results:
         print("\nChunk ID:", chunk.id)
         print(chunk.text[:200])
+
+
+
+
+        
