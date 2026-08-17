@@ -69,6 +69,13 @@ async def upload_document(
     db: Session = Depends(get_db)
 ):
 
+
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF files are allowed"
+        )
+
     reader = PdfReader(file.file)
 
     text = ""
