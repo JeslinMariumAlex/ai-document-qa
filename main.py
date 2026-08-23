@@ -1,6 +1,6 @@
 import logging
 # UploadFile and File are used to handle file uploads in FastAPI.
-from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
+from fastapi import FastAPI, UploadFile, File, Depends, HTTPException, Query
 # pydantic is used to define and validate the request body that our API recieves.
 from pydantic import BaseModel, Field
 # pypdf is a library for reading and manipulating PDF files in Python.
@@ -38,7 +38,17 @@ class QuestionRequest(BaseModel):
     question: str = Field(..., min_length=1)
 
 
-@app.post("/ask")
+class AskResponse(BaseModel):
+    question: str
+    answer: str
+
+
+class DocumentResponse(BaseModel):
+    document_id: int
+    filename: str
+    content_type: str
+
+@app.post("/ask", response_model=AskResponse)
 def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
 
     if not request.question.strip():
@@ -73,7 +83,7 @@ def ask_question(request: QuestionRequest, db: Session = Depends(get_db)):
     }
 
 
-@app.post("/documents/upload")
+@app.post("/documents/upload", response_model=DocumentResponse)
 async def upload_document(file: UploadFile = File(...), db: Session = Depends(get_db)):
 
     if file.content_type != "application/pdf":
@@ -117,3 +127,18 @@ async def upload_document(file: UploadFile = File(...), db: Session = Depends(ge
         "filename": document.filename,
         "content_type": document.content_type
     }
+
+@app.get("/documents", response_model=list[DocumentResponse])
+def get_documents(page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=100), db: Session = Depends(get_db)):
+
+    offset = (page - 1) * limit
+    documents = db.query(Document).offset(offset).limit(limit).all()
+
+    return [
+        {
+            "document_id": document.id,
+            "filename": document.filename,
+            "content_type": document.content_type
+        }
+        for document in documents
+    ]
