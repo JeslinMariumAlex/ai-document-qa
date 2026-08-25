@@ -1,6 +1,7 @@
 import logging
 # UploadFile and File are used to handle file uploads in FastAPI.
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 # pydantic is used to define and validate the request body that our API recieves.
 from pydantic import BaseModel, Field
 # pypdf is a library for reading and manipulating PDF files in Python.
@@ -15,6 +16,14 @@ from llm_service import build_prompt, generate_answer
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # This tells , Look at all the models registered with Base in the models.py file and create the database tables if they don't already exist. 
 Base.metadata.create_all(bind=engine)
