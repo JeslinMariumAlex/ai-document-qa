@@ -9,25 +9,38 @@ function App() {
   const [answer, setAnswer] = useState("");
   const [documents, setDocuments] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [asking, setAsking] = useState(false);
 
   const handleUpload = async () => {
     setUploading(true);
-    console.log(selectedFile);
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
+    try {
+      console.log(selectedFile);
 
-    const response = await fetch("http://127.0.0.1:8000/documents/upload", {
-      method: "POST",
-      body: formData,
-    });
+      const formData = new FormData();
+      formData.append("file", selectedFile);
 
-    const data = await response.json();
+      const response = await fetch("http://127.0.0.1:8000/documents/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    setDocumentId(data.document_id);
-    setMessage(`Upload successful! Document ID: ${data.document_id}`);
-    fetchDocuments(); // Refresh the list of documents
-    setUploading(false);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.detail || "Upload failed");
+        setUploading(false);
+        return;
+      }
+
+      setDocumentId(data.document_id);
+      setMessage(`Upload successful! Document ID: ${data.document_id}`);
+      fetchDocuments(); // Refresh the list of documents
+      setUploading(false);
+    } catch (error) {
+      setMessage("Could not connect to the server");
+      setUploading(false);
+    }
   };
 
   const fetchDocuments = async () => {
@@ -43,20 +56,33 @@ function App() {
   }, []);
 
   const handleAsk = async () => {
-    const response = await fetch("http://127.0.0.1:8000/ask", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        document_id: documentId,
-        question: question,
-      }),
-    });
+    setAsking(true);
+    try {
+      const response = await fetch("http://127.0.0.1:8000/ask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          document_id: documentId,
+          question: question,
+        }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    setAnswer(data.answer);
+      if (!response.ok) {
+        setAnswer(data.detail || "Something went wrong");
+        setAsking(false);
+        return;
+      }
+
+      setAnswer(data.answer);
+      setAsking(false);
+    } catch (error) {
+      setAnswer("Could not connect to the server");
+      setAsking(false);
+    }
   };
 
   return (
@@ -75,7 +101,7 @@ function App() {
       <button onClick={handleUpload} disabled={uploading}>
         {uploading ? "Uploading..." : "Upload PDF"}
       </button>
-      
+
       {message && <p>{message}</p>}
 
       <h2>Documents</h2>
@@ -101,8 +127,11 @@ function App() {
         onChange={(event) => setQuestion(event.target.value)}
       />
 
-      <button onClick={handleAsk} disabled={!documentId || !question.trim()}>
-        Ask
+      <button
+        onClick={handleAsk}
+        disabled={!documentId || !question.trim() || asking}
+      >
+        {asking ? "Asking..." : "Ask"}
       </button>
 
       {answer && (
