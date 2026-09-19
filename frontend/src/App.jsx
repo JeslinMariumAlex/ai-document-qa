@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
@@ -7,8 +7,11 @@ function App() {
   const [question, setQuestion] = useState("");
   const [documentId, setDocumentId] = useState(null);
   const [answer, setAnswer] = useState("");
+  const [documents, setDocuments] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   const handleUpload = async () => {
+    setUploading(true);
     console.log(selectedFile);
 
     const formData = new FormData();
@@ -23,7 +26,21 @@ function App() {
 
     setDocumentId(data.document_id);
     setMessage(`Upload successful! Document ID: ${data.document_id}`);
+    fetchDocuments(); // Refresh the list of documents
+    setUploading(false);
   };
+
+  const fetchDocuments = async () => {
+    const response = await fetch("http://127.0.0.1:8000/documents");
+
+    const data = await response.json();
+
+    setDocuments(data);
+  };
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
 
   const handleAsk = async () => {
     const response = await fetch("http://127.0.0.1:8000/ask", {
@@ -55,8 +72,25 @@ function App() {
 
       {selectedFile && <p>Selected file: {selectedFile.name}</p>}
 
-      <button onClick={handleUpload}>Upload PDF</button>
+      <button onClick={handleUpload} disabled={uploading}>
+        {uploading ? "Uploading..." : "Upload PDF"}
+      </button>
+      
       {message && <p>{message}</p>}
+
+      <h2>Documents</h2>
+
+      <div>
+        {documents.map((document) => (
+          <div key={document.document_id}>
+            <button onClick={() => setDocumentId(document.document_id)}>
+              {document.filename}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {documentId && <p>Selected document ID: {documentId}</p>}
 
       <h2>Ask a question</h2>
 
@@ -67,8 +101,10 @@ function App() {
         onChange={(event) => setQuestion(event.target.value)}
       />
 
-      <button onClick={handleAsk}>Ask</button>
-      
+      <button onClick={handleAsk} disabled={!documentId || !question.trim()}>
+        Ask
+      </button>
+
       {answer && (
         <div>
           <h3>Answer</h3>
