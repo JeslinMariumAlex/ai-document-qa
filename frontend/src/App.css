@@ -8,11 +8,6 @@
   padding: 10px;
 }
 
-.selected-document {
-  border: 2px solid #646cff;
-  font-weight: bold;
-}
-
 .document-list button {
   width: 300px;
   padding: 10px;
@@ -27,11 +22,18 @@
   background: #3a3a3a;
 }
 
+.document-list button.selected-document {
+  border: 2px solid #646cff;
+  font-weight: bold;
+  background: #333;
+}
+
 .upload-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  margin-bottom: 30px;
 }
 
 .question-section {
@@ -54,5 +56,52 @@
   border-radius: 8px;
   background: #242424;
   border: 1px solid #444;
+  text-align: left;
+}
+
+.app-container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 30px 0;
+}
+
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.documents-section,
+.qa-section {
+  padding: 20px;
+  border: 1px solid #333;
+  border-radius: 10px;
+  background: #1c1c1c;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-container h1 {
+  font-size: 42px;
+  margin-bottom: 30px;
+}
+
+.app-container h2 {
+  margin-bottom: 15px;
+}
+
+.answer-section h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.documents-section h2,
+.qa-section h2 {
   text-align: left;
 }

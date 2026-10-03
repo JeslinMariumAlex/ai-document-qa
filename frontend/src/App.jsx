@@ -86,7 +86,7 @@ function App() {
   };
 
   return (
-    <div>
+    <div className="app-container">
       <h1>AI Document Q&A</h1>
       <h2>Upload a PDF</h2>
 
@@ -106,47 +106,55 @@ function App() {
 
       {message && <p>{message}</p>}
 
-      <h2>Documents</h2>
+      <div className="main-content">
+        <div className="documents-section">
+          <h2>Documents</h2>
 
-      <div className="document-list">
-        {documents.map((document) => (
-          <div key={document.document_id}>
+          <div className="document-list">
+            {documents.map((document) => (
+              <div key={document.document_id}>
+                <button
+                  className={
+                    documentId === document.document_id
+                      ? "selected-document"
+                      : ""
+                  }
+                  onClick={() => setDocumentId(document.document_id)}
+                >
+                  {document.filename}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="qa-section">
+          <h2>Ask a question</h2>
+
+          <div className="question-section">
+            <input
+              type="text"
+              placeholder="Ask something about the document..."
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+            />
+
             <button
-              className={
-                documentId === document.document_id ? "selected-document" : ""
-              }
-              onClick={() => setDocumentId(document.document_id)}
+              onClick={handleAsk}
+              disabled={!documentId || !question.trim() || asking}
             >
-              {document.filename}
+              {asking ? "Asking..." : "Ask"}
             </button>
           </div>
-        ))}
-      </div>
 
-      <h2>Ask a question</h2>
-
-      <div className="question-section">
-        <input
-          type="text"
-          placeholder="Ask something about the document..."
-          value={question}
-          onChange={(event) => setQuestion(event.target.value)}
-        />
-
-        <button
-          onClick={handleAsk}
-          disabled={!documentId || !question.trim() || asking}
-        >
-          {asking ? "Asking..." : "Ask"}
-        </button>
-      </div>
-
-      {answer && (
-        <div className="answer-section">
-          <h3>Answer</h3>
-          <p>{answer}</p>
+          {answer && (
+            <div className="answer-section">
+              <h3>Answer</h3>
+              <p>{answer}</p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
