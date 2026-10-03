@@ -78,6 +78,7 @@ function App() {
       }
 
       setAnswer(data.answer);
+      setQuestion("");
       setAsking(false);
     } catch (error) {
       setAnswer("Could not connect to the server");
@@ -137,6 +138,16 @@ function App() {
               placeholder="Ask something about the document..."
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
+              onKeyDown={(event) => {
+                if (
+                  event.key === "Enter" &&
+                  documentId &&
+                  question.trim() &&
+                  !asking
+                ) {
+                  handleAsk();
+                }
+              }}
             />
 
             <button
