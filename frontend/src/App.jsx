@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
 
 function App() {
+  const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [message, setMessage] = useState("");
   const [question, setQuestion] = useState("");
@@ -35,6 +36,8 @@ function App() {
 
       setDocumentId(data.document_id);
       setMessage(`Upload successful! Document ID: ${data.document_id}`);
+      setSelectedFile(null);
+      fileInputRef.current.value = "";
       fetchDocuments(); // Refresh the list of documents
       setUploading(false);
     } catch (error) {
@@ -93,6 +96,7 @@ function App() {
 
       <div className="upload-section">
         <input
+          ref={fileInputRef}
           type="file"
           accept=".pdf"
           onChange={(event) => setSelectedFile(event.target.files[0])}
@@ -100,7 +104,7 @@ function App() {
 
         {selectedFile && <p>Selected file: {selectedFile.name}</p>}
 
-        <button onClick={handleUpload} disabled={uploading}>
+        <button onClick={handleUpload} disabled={!selectedFile || uploading}>
           {uploading ? "Uploading..." : "Upload PDF"}
         </button>
       </div>
