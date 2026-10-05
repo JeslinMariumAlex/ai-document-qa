@@ -116,20 +116,24 @@ function App() {
           <h2>Documents</h2>
 
           <div className="document-list">
-            {documents.map((document) => (
-              <div key={document.document_id}>
-                <button
-                  className={
-                    documentId === document.document_id
-                      ? "selected-document"
-                      : ""
-                  }
-                  onClick={() => setDocumentId(document.document_id)}
-                >
-                  {document.filename}
-                </button>
-              </div>
-            ))}
+            {documents.length === 0 ? (
+              <p>No documents uploaded yet.</p>
+            ) : (
+              documents.map((document) => (
+                <div key={document.document_id}>
+                  <button
+                    className={
+                      documentId === document.document_id
+                        ? "selected-document"
+                        : ""
+                    }
+                    onClick={() => setDocumentId(document.document_id)}
+                  >
+                    {document.filename}
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
