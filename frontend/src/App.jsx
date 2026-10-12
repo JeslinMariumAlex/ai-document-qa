@@ -11,6 +11,7 @@ function App() {
   const [documents, setDocuments] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [asking, setAsking] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
 
   const handleUpload = async () => {
     setUploading(true);
@@ -82,6 +83,13 @@ function App() {
 
       setAnswer(data.answer);
       setQuestion("");
+      setChatHistory((previousHistory) => [
+        ...previousHistory,
+        {
+          question: question,
+          answer: data.answer,
+        },
+      ]);
       setAsking(false);
     } catch (error) {
       setAnswer("Could not connect to the server");
@@ -166,12 +174,16 @@ function App() {
             </button>
           </div>
 
-          {answer && (
-            <div className="answer-section">
-              <h3>Answer</h3>
-              <p>{answer}</p>
-            </div>
-          )}
+          <div className="chat-history">
+            {chatHistory.map((chat, index) => (
+              <div className="answer-section" key={index}>
+                <h3>Question</h3>
+                <p>{chat.question}</p>
+                <h3>Answer</h3>
+                <p>{chat.answer}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

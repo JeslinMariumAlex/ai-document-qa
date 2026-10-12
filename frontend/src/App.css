@@ -105,3 +105,9 @@
 .qa-section h2 {
   text-align: left;
 }
+
+.chat-history {
+  max-height: 500px;
+  overflow-y: auto;
+  margin-top: 20px;
+}
