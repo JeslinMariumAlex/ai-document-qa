@@ -135,7 +135,13 @@ function App() {
                         ? "selected-document"
                         : ""
                     }
-                    onClick={() => setDocumentId(document.document_id)}
+                    onClick={() => {
+                      if (documentId !== document.document_id) {
+                        setDocumentId(document.document_id);
+                        setChatHistory([]);
+                        setAnswer("");
+                      }
+                    }}
                   >
                     {document.filename}
                   </button>
