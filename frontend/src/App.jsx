@@ -12,6 +12,7 @@ function App() {
   const [uploading, setUploading] = useState(false);
   const [asking, setAsking] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
+  const [askError, setAskError] = useState("");
 
   const handleUpload = async () => {
     setUploading(true);
@@ -61,6 +62,7 @@ function App() {
 
   const handleAsk = async () => {
     setAsking(true);
+    setAskError("");
     try {
       const response = await fetch("http://127.0.0.1:8000/ask", {
         method: "POST",
@@ -76,7 +78,7 @@ function App() {
       const data = await response.json();
 
       if (!response.ok) {
-        setAnswer(data.detail || "Something went wrong");
+        setAskError(data.detail || "Something went wrong");
         setAsking(false);
         return;
       }
@@ -92,7 +94,7 @@ function App() {
       ]);
       setAsking(false);
     } catch (error) {
-      setAnswer("Could not connect to the server");
+      setAskError("Could not connect to the server. Please check that the backend and AI service are running.");
       setAsking(false);
     }
   };
@@ -179,6 +181,8 @@ function App() {
               {asking ? "Asking..." : "Ask"}
             </button>
           </div>
+
+          {askError && <p className="error-message">{askError}</p>}
 
           <div className="chat-history">
             {chatHistory.map((chat, index) => (

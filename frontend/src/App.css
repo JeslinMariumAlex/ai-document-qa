@@ -111,3 +111,9 @@
   overflow-y: auto;
   margin-top: 20px;
 }
+
+.error-message {
+  color: #ff6b6b;
+  margin-top: 10px;
+  text-align: left;
+}
