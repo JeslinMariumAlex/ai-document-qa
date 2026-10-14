@@ -3,6 +3,7 @@ import "./App.css";
 
 function App() {
   const fileInputRef = useRef(null);
+  const chatEndRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [message, setMessage] = useState("");
   const [question, setQuestion] = useState("");
@@ -12,6 +13,11 @@ function App() {
   const [uploading, setUploading] = useState(false);
   const [asking, setAsking] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatHistory]);
+
   const [askError, setAskError] = useState("");
 
   const handleUpload = async () => {
@@ -95,7 +101,9 @@ function App() {
       ]);
       setAsking(false);
     } catch (error) {
-      setAskError("Could not connect to the server. Please check that the backend and AI service are running.");
+      setAskError(
+        "Could not connect to the server. Please check that the backend and AI service are running.",
+      );
       setAsking(false);
     }
   };
@@ -195,6 +203,7 @@ function App() {
                 <p>{chat.answer}</p>
               </div>
             ))}
+            <div ref={chatEndRef} />
           </div>
         </div>
       </div>
