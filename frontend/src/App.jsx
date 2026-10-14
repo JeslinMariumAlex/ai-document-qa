@@ -37,6 +37,7 @@ function App() {
       }
 
       setDocumentId(data.document_id);
+      setAskError("");
       setMessage(`Upload successful! Document ID: ${data.document_id}`);
       setSelectedFile(null);
       fileInputRef.current.value = "";
@@ -142,6 +143,7 @@ function App() {
                         setDocumentId(document.document_id);
                         setChatHistory([]);
                         setAnswer("");
+                        setAskError("");
                       }
                     }}
                   >
