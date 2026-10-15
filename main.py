@@ -137,17 +137,24 @@ async def upload_document(file: UploadFile = File(...), db: Session = Depends(ge
         "content_type": document.content_type
     }
 
-@app.get("/documents", response_model=list[DocumentResponse])
+@app.get("/documents")
 def get_documents(page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=100), db: Session = Depends(get_db)):
 
     offset = (page - 1) * limit
-    documents = db.query(Document).offset(offset).limit(limit).all()
+    total_documents = db.query(Document).count()
+    documents = db.query(Document).order_by(Document.id.desc()).offset(offset).limit(limit).all()
 
-    return [
-        {
-            "document_id": document.id,
-            "filename": document.filename,
-            "content_type": document.content_type
-        }
-        for document in documents
-    ]
+    return {
+        "documents": [
+            {
+                "document_id": document.id,
+                "filename": document.filename,
+                "content_type": document.content_type
+            }
+            for document in documents
+        ],
+        "total_documents": total_documents,
+        "page": page,
+        "limit": limit
+    }
+

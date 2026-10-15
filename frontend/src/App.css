@@ -117,3 +117,26 @@
   margin-top: 10px;
   text-align: left;
 }
+
+.qa-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.qa-header h2 {
+  margin-bottom: 0;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.pagination-controls span {
+  white-space: nowrap;
+}

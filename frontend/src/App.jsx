@@ -13,6 +13,8 @@ function App() {
   const [uploading, setUploading] = useState(false);
   const [asking, setAsking] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalDocuments, setTotalDocuments] = useState(0);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -56,16 +58,19 @@ function App() {
   };
 
   const fetchDocuments = async () => {
-    const response = await fetch("http://127.0.0.1:8000/documents");
+    const response = await fetch(
+      `http://127.0.0.1:8000/documents?page=${currentPage}&limit=10`,
+    );
 
     const data = await response.json();
 
-    setDocuments(data);
+    setDocuments(data.documents);
+    setTotalDocuments(data.total_documents);
   };
 
   useEffect(() => {
     fetchDocuments();
-  }, []);
+  }, [currentPage]);
 
   const handleAsk = async () => {
     setAsking(true);
@@ -161,10 +166,39 @@ function App() {
               ))
             )}
           </div>
+          <div className="pagination-controls">
+            <button
+              onClick={() => setCurrentPage((previousPage) => previousPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+
+            <span>Page {currentPage}</span>
+
+            <button
+              onClick={() => setCurrentPage((previousPage) => previousPage + 1)}
+              disabled={currentPage >= Math.ceil(totalDocuments / 10)}
+            >
+              Next
+            </button>
+          </div>
         </div>
 
         <div className="qa-section">
-          <h2>Ask a question</h2>
+          <div className="qa-header">
+            <h2>Ask a question</h2>
+            <button
+              onClick={() => {
+                setChatHistory([]);
+                setAnswer("");
+                setAskError("");
+              }}
+              disabled={chatHistory.length === 0}
+            >
+              Clear Chat
+            </button>
+          </div>
 
           <div className="question-section">
             <input
